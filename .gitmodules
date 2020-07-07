@@ -1,3 +1,3 @@
 [submodule "word2mat"]
 	path = word2mat
-	url = https://github.com/florianmai/word2mat
+	url = https://github.com/stephen-huan/word2mat

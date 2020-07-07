@@ -1,7 +1,8 @@
 # ASSIP 2020
 
 ## Setup
-This project uses [word2mat](https://github.com/florianmai/word2mat).
+This project uses [word2mat](https://github.com/florianmai/word2mat),
+specifically our [fork](https://github.com/stephen-huan/word2mat).
 
 ### Software
 To install the dependencies, use [pipenv](https://pipenv.pypa.io/en/latest/): 
