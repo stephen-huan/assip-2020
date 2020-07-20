@@ -5,6 +5,11 @@ This project uses [word2mat](https://github.com/florianmai/word2mat),
 specifically our [fork](https://github.com/stephen-huan/word2mat).
 
 ### Software
+First, clone the repository and update the submodules:
+```
+git clone --recursive https://github.com/stephen-huan/assip-2020
+```
+
 To install the dependencies, use [pipenv](https://pipenv.pypa.io/en/latest/): 
 ```bash
 pipenv install
