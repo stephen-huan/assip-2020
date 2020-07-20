@@ -28,6 +28,7 @@ datatypes = {"train": np.dtype({'names': ['id', 'essay','score1', 'score2', 'tex
              "private_leaderboard": np.dtype({'names': ['id', 'essay', 'text'],
                                              'formats': [uint, uint, ustr]})
             }
+ENCODING = "utf-8"
 
 def parse_url(fname: str) -> None:
     """ Downloads a dataset to the a folder. """
@@ -63,6 +64,9 @@ if __name__ == "__main__":
     parser.add_argument("-s", "--summary", dest="summary", 
                         action="store_true", default=False,
                         help="display summary statistics about the datasets")
+    parser.add_argument("-g", "--generate", dest="gen",
+                        type=int, default=None, 
+                        help="generate a text file with sentences")
     args = parser.parse_args()
 
     if args.download:
@@ -87,4 +91,11 @@ if __name__ == "__main__":
     else:
         print("Datasets have not been downloaded.\nDid you run with -d?")
 
+    if args.gen is not None:
+        out_path = "word2mat/data/sentence.txt"
+
+        with open("data/sentence.txt", encoding=ENCODING) as fin:
+            with open(out_path, "w", encoding=ENCODING) as fout:
+                for i in range(args.gen):
+                    fout.write(fin.readline())
 
