@@ -21,17 +21,17 @@ pipenv run python -c "import nltk; nltk.download('punkt')"
 Datasets used are from the Hewlett Foundation's Automated Essay Scoring
 competition on [Kaggle](https://www.kaggle.com/c/asap-aes/overview).
 
-To download the datasets, run 
+To download the datasets, make a new folder called `data` and run
+this command in the folder:
 ```bash
-python data.py -d 
+kaggle competitions download -c asap-aes
 ```
 
-This will load the data in a new folder called `data`.
-- train.tsv: training set 
+- training_set_rel3.tsv: training set 
 (used to fit the model to the data, e.g. adjusted weights for a neural network)
-- public_leaderboard.tsv: validation set 
+- valid_set.tsv: validation set 
 (used to determine hyperparameters of the model, e.g. activation function or depth)
-- private_leaderboard.tsv: test set 
+- test_set.tsv: test set 
 (used to test final model)
 
 Another dataset used is the [UMBC Corpus](https://ebiquity.umbc.edu/resource/html/id/351).
