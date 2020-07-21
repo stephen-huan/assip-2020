@@ -13,6 +13,7 @@ corpus: large text corpus
 import os, argparse, csv
 import requests
 import numpy as np
+import pandas as pd
 from scipy import stats
 
 uint = np.uint32
@@ -55,6 +56,28 @@ def summary_stats(fname: str, data: np.array) -> None:
 {stats.pearsonr(data['score1'], data['score2'])[0]:.3f}")
     print("-"*(22 + len(fname)) + "\n")
 
+def parse_output(fname: str) -> None:
+    """ Parses the output of SentEval. """
+    df = pd.read_csv(fname, header=0, sep=";")
+    tasks = [("Probing", 
+              ["Depth", "BigramShift", "SubjNumber", "Tense", "CoordinationInversion", 
+               "Length", "ObjNumber", "TopConstituents", "OddManOut", "WordContent"]),
+             ("Supervised downstream", 
+              ["SNLI", "SUBJ", "CR", "MR", "MPQA", "TREC", "SICKEntailment", 
+               "SST2", "SST5", "MRPC", "STSBenchmark", "SICKRelatedness"]),
+             ("Unsupervised downstream",
+              ["STS12", "STS13", "STS14", "STS15", "STS16"])
+            ]
+
+    # according to SentEval paper, average the two scores for STSx
+    for sts in tasks[-1][-1] + ["STSBenchmark", "SICKRelatedness"]:
+        score1, score2 = eval(df[sts][0])
+        df[sts] = (score1 + score2)/2
+
+    for name, task in tasks:
+        print(f"{name}: ")
+        print(df[task], "\n")
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="data management script")
     parser.add_argument("-v", "--version", action="version", version="1.0.0")
@@ -67,6 +90,9 @@ if __name__ == "__main__":
     parser.add_argument("-g", "--generate", dest="gen",
                         type=int, default=None, 
                         help="generate a text file with sentences")
+    parser.add_argument("-o", "--output", dest="output", 
+                        action="store_true", default=False,
+                        help="display the result of SentEval")
     args = parser.parse_args()
 
     if args.download:
@@ -98,4 +124,7 @@ if __name__ == "__main__":
             with open(out_path, "w", encoding=ENCODING) as fout:
                 for i in range(args.gen):
                     fout.write(fin.readline())
+
+    if args.output:
+        parse_output("word2mat/output/output.csv")
 
