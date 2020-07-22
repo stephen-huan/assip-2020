@@ -6,7 +6,7 @@ train: training set
 validation: validation set
 test: testing set
 """
-import os, argparse, csv
+import os, argparse, csv, glob
 import requests
 import numpy as np
 import pandas as pd
@@ -40,27 +40,36 @@ def summary_stats(fname: str, df: pd.DataFrame) -> None:
 {stats.pearsonr(df['rater1_domain1'], df['rater2_domain1'])[0]:.3f}")
     print("-"*(22 + len(fname)) + "\n")
 
-def parse_output(fname: str) -> None:
+def parse_output(path: str) -> None:
     """ Parses the output of SentEval. """
-    df = pd.read_csv(fname, header=0, sep=";")
     tasks = [("Probing", 
-              ["Depth", "BigramShift", "SubjNumber", "Tense", "CoordinationInversion", 
-               "Length", "ObjNumber", "TopConstituents", "OddManOut", "WordContent"]),
-             ("Supervised downstream", 
-              ["SNLI", "SUBJ", "CR", "MR", "MPQA", "TREC", "SICKEntailment", 
-               "SST2", "SST5", "MRPC", "STSBenchmark", "SICKRelatedness"]),
-             ("Unsupervised downstream",
-              ["STS12", "STS13", "STS14", "STS15", "STS16"])
+                ["Depth", "BigramShift", "SubjNumber", "Tense", "CoordinationInversion", 
+                "Length", "ObjNumber", "TopConstituents", "OddManOut", "WordContent"]),
+            ("Supervised downstream", 
+                ["SNLI", "SUBJ", "CR", "MR", "MPQA", "TREC", "SICKEntailment", 
+                "SST2", "SST5", "MRPC", "STSBenchmark", "SICKRelatedness"]),
+            ("Unsupervised downstream",
+                ["STS12", "STS13", "STS14", "STS15", "STS16"])
             ]
 
-    # according to SentEval paper, average the two scores for STSx
-    for sts in tasks[-1][-1] + ["STSBenchmark", "SICKRelatedness"]:
-        score1, score2 = eval(df[sts][0])
-        df[sts] = (score1 + score2)/2
+    table = None
+    for fname in glob.glob(f"{path}*.csv"):
+        df = pd.read_csv(fname, header=0, sep=";")
+        df = df.rename(index={0: fname.split("/")[-1].split(".")[0]})
+
+        # according to SentEval paper, average the two scores for STSx
+        for sts in tasks[-1][-1] + ["STSBenchmark", "SICKRelatedness"]:
+            score1, score2 = eval(df[sts][0])
+            df[sts] = (score1 + score2)/2
+
+        if table is None:
+            table = df
+        else:
+            table = table.append(df)
 
     for name, task in tasks:
         print(f"{name}: ")
-        print(df[task], "\n")
+        print(table[task], "\n")
 
 def scale_score(essay_set: int, score: int) -> int:
     """ Returns the score scaled to an integer between 0 and 100. """
@@ -142,5 +151,5 @@ if __name__ == "__main__":
                     fout.write(fin.readline())
 
     if args.output:
-        parse_output("word2mat/output/output.csv")
+        parse_output("word2mat/output/")
 
