@@ -16,22 +16,28 @@ FOLDER = "data/asap-aes"
 asap_datasets = ["training_set_rel3", "valid_set", "test_set"]
 ENCODING = "utf-8"
 
+# 1-indexed, gives the (min score, max score) for each essay set
+score_range = [None, (2, 12), (1, 6), (0, 3), (0, 3), (0, 4), (0, 4), (0, 30), (0, 60), (1, 4)]
+MAX_SCORE = 100
+
 def parse_tsv_file(fname: str) -> pd.DataFrame:
     """ Loads a .tsv file into a structured pandas dataframe. """
     return pd.read_csv(f"{FOLDER}/{fname}.tsv", header=0, sep="\t", encoding="latin")
 
-def summary_stats(fname: str, data: pd.DataFrame) -> None:
+def summary_stats(fname: str, df: pd.DataFrame) -> None:
     """ Displays summary statistics about a dataframe. """
     print("-"*10 + f" {fname} " + "-"*10)
-    print(f"Header: {', '.join(x for x in data.columns)}")
-    print(f"Number of rows: {len(data)}")
-    print(f"Average length of responses (sentences): {np.average([len(x.split('.')) for x in data['essay']]):.1f}")
-    print(f"Average length of responses (words): {np.average([len(x.split()) for x in data['essay']]):.1f}")
-    print(f"Average length of responses (characters): {np.average([len(x) for x in data['essay']]):.1f}")
-    if "train" in fname:
-        print(f"Average score: {np.average(data['domain1_score']):.3f}")
+    print(f"Header: {', '.join(x for x in df.columns)}")
+    print(f"Number of rows: {len(df)}")
+    print(f"Average length of responses (sentences): {np.average([len(x.split('.')) for x in df['essay']]):.1f}")
+    print(f"Average length of responses (words): {np.average([len(x.split()) for x in df['essay']]):.1f}")
+    print(f"Average length of responses (characters): {np.average([len(x) for x in df['essay']]):.1f}")
+    if "processed" in fname:
+        print(f"Average score: {np.average(df['score']):.3f}")
+    elif "train" in fname:
+        print(f"Average score: {np.average(df['domain1_score']):.3f}")
         print(f"Pearson's correlation between scorers: \
-{stats.pearsonr(data['rater1_domain1'], data['rater2_domain1'])[0]:.3f}")
+{stats.pearsonr(df['rater1_domain1'], df['rater2_domain1'])[0]:.3f}")
     print("-"*(22 + len(fname)) + "\n")
 
 def parse_output(fname: str) -> None:
@@ -55,6 +61,39 @@ def parse_output(fname: str) -> None:
     for name, task in tasks:
         print(f"{name}: ")
         print(df[task], "\n")
+
+def scale_score(essay_set: int, score: int) -> int:
+    """ Returns the score scaled to an integer between 0 and 100. """
+    essay_set, score = int(essay_set), int(score)
+    mn, mx = score_range[essay_set]
+    return round(MAX_SCORE*(score - mn)/(mx - mn))
+
+def unscale_score(essay_set: int, scaled: int) -> int:
+    """ Returns the closest score within the range from a scaled score. """
+    essay_set, score = int(essay_set), int(scaled)
+    mn, mx = score_range[essay_set]
+    return round((mx - mn)*scaled/MAX_SCORE)
+
+def preprocess(df: pd.DataFrame) -> pd.DataFrame:
+    """ Preprocesses the training data into a standard form. """
+    # essay set 2 has two different domains, add second domain as new rows
+    set2 = df[df["essay_set"] == 2].copy()
+    set2["domain1_score"] = set2["domain2_score"]
+    # for simplicity, treat set 2's secondary domain as a new set
+    set2["essay_set"] = 9
+    df = df.append(set2)
+
+    # scale domain1_score into score
+    df["score"] = df[["essay_set", "domain1_score"]].apply(lambda x: scale_score(*x), axis=1)
+
+    # remove unnecessary columns
+    cols = ["essay_id"] + \
+           [f"rater{i}_domain{j}" for i in range(1, 4) for j in range(1, 3)][:-1] + \
+           [f"domain{i}_score" for i in range(1, 3)] + \
+           [f"rater{i}_trait{j}" for i in range(1, 4) for j in range(1, 7)]
+    df = df.drop(columns=cols)
+
+    return df
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="data management script")
@@ -84,7 +123,11 @@ if __name__ == "__main__":
             if args.summary:
                 summary_stats(dataset, data[dataset])
 
-        train = data["training_set_rel3"]
+        train_processed = preprocess(data["training_set_rel3"])
+        if args.summary:
+            summary_stats("training_set_rel3 (processed)", train_processed)
+
+        train = train_processed
         validation = data["valid_set"]
         test = data["test_set"]
     else:
