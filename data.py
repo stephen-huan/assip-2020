@@ -104,6 +104,18 @@ def preprocess(df: pd.DataFrame) -> pd.DataFrame:
 
     return df
 
+if os.path.exists(FOLDER):
+    data = {}
+    for dataset in asap_datasets:
+        data[dataset] = parse_tsv_file(dataset)
+
+    train_processed = preprocess(data["training_set_rel3"])
+    train = train_processed
+    validation = data["valid_set"]
+    test = data["test_set"]
+else:
+    print("Datasets have not been downloaded.\nDid you run with -d?")
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="data management script")
     parser.add_argument("-v", "--version", action="version", version="1.0.0")
@@ -125,22 +137,10 @@ if __name__ == "__main__":
         if not os.path.exists(FOLDER):
             os.mkdir(FOLDER)
 
-    if os.path.exists(FOLDER):
-        data = {}
+    if args.summary:
         for dataset in asap_datasets:
-            data[dataset] = parse_tsv_file(dataset)
-            if args.summary:
-                summary_stats(dataset, data[dataset])
-
-        train_processed = preprocess(data["training_set_rel3"])
-        if args.summary:
-            summary_stats("training_set_rel3 (processed)", train_processed)
-
-        train = train_processed
-        validation = data["valid_set"]
-        test = data["test_set"]
-    else:
-        print("Datasets have not been downloaded.\nDid you run with -d?")
+            summary_stats(dataset, data[dataset])
+        summary_stats("training_set_rel3 (processed)", train)
 
     if args.gen is not None:
         out_path = "word2mat/data/sentence.txt"
