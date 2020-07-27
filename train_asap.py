@@ -121,4 +121,19 @@ if __name__ == "__main__":
                 print(f"took {time.time() - start} seconds for {args.validation_frequency} batches")
                 total_loss = 0
                 start = time.time()
+    
+    if min_val < float("inf"):
+        print("loading best model:")
+        model = torch.load(f"{args.outputdir}/model.net")
+        if not isinstance(model, nn.Sequential):
+            model = model.module
+
+    with torch.no_grad():
+        y_pred = model(valX)
+        val_loss = loss_fn(y_pred, valy)
+        correct = (torch.argmax(y_pred, 1) == valy).sum().item()
+
+    print(f"validation loss: {val_loss}, validation accuracy: {correct/len(valX)}")
+
+
 
