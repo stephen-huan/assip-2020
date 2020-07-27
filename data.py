@@ -183,7 +183,7 @@ def make_train_set(df: pd.DataFrame, pre=preprocess_train) -> np.array:
     """ Returns a finalized numpy array for training. """
     return np.array([train_vec(row) for i, row in pre(df).iterrows()])
 
-make_test_set = lambda df: make_train_set(df[1000:], preprocess_test) 
+make_test_set = lambda df: make_train_set(df, preprocess_test) 
 
 if os.path.exists(FOLDER):
     data = {}
@@ -196,6 +196,7 @@ if os.path.exists(FOLDER):
     arrays = glob.glob("data/*.npy")
     if len(arrays) == 3:
         trainX, trainy = np.load("data/train.npy"), _train_pre["score"].to_numpy()
+        # trainy = np.array([one_hot_encode(MAX_SCORE + 1, x) for x in trainy])
         train = (trainX, trainy)
         validation = np.load("data/validation.npy")
         test = np.load("data/test.npy") 
