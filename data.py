@@ -207,7 +207,7 @@ if os.path.exists(FOLDER):
         test = np.load(path_npy("test"))
     else:
         print("Datasets have not been processed. Processing...")
-        if not os.path.exists(f"data/{model_name}"):
+        if not os.path.exists(f"data/{model_name}-npy"):
             os.mkdir(f"data/{model_name}")
         np.save(path_npy("train"), make_train_set(_train))
         np.save(path_npy("validation"), make_test_set(_validation))
