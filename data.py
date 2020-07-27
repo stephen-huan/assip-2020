@@ -183,6 +183,10 @@ def make_train_set(df: pd.DataFrame, pre=preprocess_train) -> np.array:
     """ Returns a finalized numpy array for training. """
     return np.array([train_vec(row) for i, row in pre(df).iterrows()])
 
+def path_npy(fname: str) -> str:
+    """ Returns a path for npy files. """
+    return f"data/{model_name}-npy/{fname}.npy"
+
 make_test_set = lambda df: make_train_set(df, preprocess_test) 
 
 if os.path.exists(FOLDER):
@@ -193,18 +197,21 @@ if os.path.exists(FOLDER):
     _train, _validation, _test = data["training_set_rel3"], data["valid_set"], data["test_set"] 
     _train_pre = preprocess_train(_train)
 
-    arrays = glob.glob("data/*.npy")
+    model_name = MODEL_PATH.split("/")[-2] 
+    arrays = glob.glob(path_npy("*"))
     if len(arrays) == 3:
-        trainX, trainy = np.load("data/train.npy"), _train_pre["score"].to_numpy()
+        trainX, trainy = np.load(path_npy("train")), _train_pre["score"].to_numpy()
         # trainy = np.array([one_hot_encode(MAX_SCORE + 1, x) for x in trainy])
         train = (trainX, trainy)
-        validation = np.load("data/validation.npy")
-        test = np.load("data/test.npy") 
+        validation = np.load(path_npy("validation"))
+        test = np.load(path_npy("test"))
     else:
         print("Datasets have not been processed. Processing...")
-        np.save("data/train.npy", make_train_set(_train))
-        np.save("data/validation.npy", make_test_set(_validation))
-        np.save("data/test.npy", make_test_set(_test))
+        if not os.path.exists(f"data/{model_name}"):
+            os.mkdir(f"data/{model_name}")
+        np.save(path_npy("train"), make_train_set(_train))
+        np.save(path_npy("validation"), make_test_set(_validation))
+        np.save(path_npy("test"), make_test_set(_test))
 else:
     print("Datasets have not been downloaded.\nDid you run with -d?")
 
@@ -223,9 +230,6 @@ if __name__ == "__main__":
     parser.add_argument("-o", "--output", dest="output", 
                         action="store_true", default=False,
                         help="display the result of SentEval")
-    parser.add_argument("-c", "--clear", dest="clear", 
-                        action="store_true", default=False,
-                        help="clear *.npy cache files")
     args = parser.parse_args()
 
     if args.download:
@@ -247,8 +251,4 @@ if __name__ == "__main__":
 
     if args.output:
         parse_output("word2mat/output/")
-
-    if args.clear:
-        for fname in glob.glob("data/*.npy"):
-            os.remove(fname)
 
