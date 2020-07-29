@@ -96,7 +96,8 @@ def parse_output(path: str, compare:bool=False) -> None:
             diff[task] = [round(100*(row0[task] - row1[task])/row1[task], 2)]
         diff = pd.DataFrame.from_dict(diff)
         print(f"compare {names[-2]} to {names[-1]}")
-        print(diff.to_markdown() if args.markdown else difff)
+        print(diff.to_markdown() if args.markdown else diff)
+        print(f"average percent difference: {round(diff.iloc[0].mean(), 2)}")
 
 def scale_score(essay_set: int, score: int) -> int:
     """ Returns the score scaled to an integer between 0 and 100. """

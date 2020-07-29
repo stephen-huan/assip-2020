@@ -113,3 +113,9 @@ Unsupervised downstream:
 | nonlinear_full | 0.22191  | 0.11622  | 0.286445 | 0.324294 | 0.363277 |
 | cmow_full      | 0.21983  | 0.112364 | 0.284414 | 0.333384 | 0.381094 | 
 
+
+compare nonlinear_full to cmow_full (percentage difference)
+|    |   Depth |   BigramShift |   SubjNumber |   Tense |   CoordinationInversion |   Length |   ObjNumber |   TopConstituents |   OddManOut |   WordContent |   SNLI |   SUBJ |    CR |    MR |   MPQA |   TREC |   SICKEntailment |   SST2 |   SST5 |   MRPC |   STSBenchmark |   SICKRelatedness |   STS12 |   STS13 |   STS14 |   STS15 |   STS16 |
+|---:|--------:|--------------:|-------------:|--------:|------------------------:|---------:|------------:|------------------:|------------:|--------------:|-------:|-------:|------:|------:|-------:|-------:|-----------------:|-------:|-------:|-------:|---------------:|------------------:|--------:|--------:|--------:|--------:|--------:|
+|  cmp |   -0.91 |          0.86 |        -0.23 |   -0.71 |                   -1.14 |    -1.19 |       -1.39 |                -1 |        1.08 |         -1.58 |   -0.2 |  -0.72 | -0.74 | -0.83 |  -0.89 |    1.2 |            -0.82 |   2.05 |  -8.52 |  -1.35 |           -4.7 |               1.7 |    0.95 |    3.43 |    0.71 |   -2.73 |   -4.67 |
+
