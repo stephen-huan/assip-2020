@@ -83,7 +83,8 @@ def parse_output(path: str) -> None:
 
     for name, task in tasks:
         print(f"{name}: ")
-        print(table[task], "\n")
+        print(table[task].to_markdown(tablefmt="grid")
+              if args.markdown else table[task], "\n")
 
 def scale_score(essay_set: int, score: int) -> int:
     """ Returns the score scaled to an integer between 0 and 100. """
@@ -230,6 +231,9 @@ if __name__ == "__main__":
     parser.add_argument("-o", "--output", dest="output", 
                         action="store_true", default=False,
                         help="display the result of SentEval")
+    parser.add_argument("-m", "--markdown", dest="markdown", 
+                        action="store_true", default=False,
+                        help="display the result as a markdown table")
     args = parser.parse_args()
 
     if args.download:

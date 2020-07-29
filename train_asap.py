@@ -135,5 +135,3 @@ if __name__ == "__main__":
 
     print(f"validation loss: {val_loss}, validation accuracy: {correct/len(valX)}")
 
-
-
