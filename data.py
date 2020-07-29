@@ -54,7 +54,7 @@ def summary_stats(fname: str, df: pd.DataFrame) -> None:
 {stats.pearsonr(df['rater1_domain1'], df['rater2_domain1'])[0]:.3f}")
     print("-"*(22 + len(fname)) + "\n")
 
-def parse_output(path: str) -> None:
+def parse_output(path: str, compare:bool=False) -> None:
     """ Parses the output of SentEval. """
     tasks = [("Probing", 
                 ["Depth", "BigramShift", "SubjNumber", "Tense", "CoordinationInversion", 
@@ -67,9 +67,12 @@ def parse_output(path: str) -> None:
             ]
 
     table = None
+    names = []
     for fname in glob.glob(f"{path}*.csv"):
         df = pd.read_csv(fname, header=0, sep=";")
-        df = df.rename(index={0: fname.split("/")[-1].split(".")[0]})
+        name = fname.split("/")[-1].split(".")[0]
+        names.append(name)
+        df = df.rename(index={0: name})
 
         # according to SentEval paper, average the two scores for STSx
         for sts in tasks[-1][-1] + ["STSBenchmark", "SICKRelatedness"]:
@@ -85,6 +88,15 @@ def parse_output(path: str) -> None:
         print(f"{name}: ")
         print(table[task].to_markdown()
               if args.markdown else table[task], "\n")
+
+    if compare:
+        row0, row1 = table.loc[names[-2]], table.loc[names[-1]]
+        diff = {}
+        for task in tasks[0][-1] + tasks[1][-1] + tasks[2][-1]:
+            diff[task] = [round(100*(row0[task] - row1[task])/row1[task], 2)]
+        diff = pd.DataFrame.from_dict(diff)
+        print(f"compare {names[-2]} to {names[-1]}")
+        print(diff.to_markdown() if args.markdown else difff)
 
 def scale_score(essay_set: int, score: int) -> int:
     """ Returns the score scaled to an integer between 0 and 100. """
@@ -234,6 +246,9 @@ if __name__ == "__main__":
     parser.add_argument("-m", "--markdown", dest="markdown", 
                         action="store_true", default=False,
                         help="display the result as a markdown table")
+    parser.add_argument("-c", "--compare", dest="compare", 
+                        action="store_true", default=False,
+                        help="track percent difference")
     args = parser.parse_args()
 
     if args.download:
@@ -254,5 +269,5 @@ if __name__ == "__main__":
                     fout.write(fin.readline())
 
     if args.output:
-        parse_output("word2mat/output/")
+        parse_output("word2mat/output/", args.compare)
 
