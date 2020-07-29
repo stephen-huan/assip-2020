@@ -83,7 +83,7 @@ def parse_output(path: str) -> None:
 
     for name, task in tasks:
         print(f"{name}: ")
-        print(table[task].to_markdown(tablefmt="grid")
+        print(table[task].to_markdown()
               if args.markdown else table[task], "\n")
 
 def scale_score(essay_set: int, score: int) -> int:
