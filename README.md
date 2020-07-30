@@ -19,7 +19,7 @@ pipenv run python -c "import nltk; nltk.download('punkt')"
 
 ### Data
 One dataset used is from the Hewlett Foundation's Automated Essay Scoring
-competition on [Kaggle](https://www.kaggle.com/c/asap-aes/overview).
+(ASAP-AES) competition on [Kaggle](https://www.kaggle.com/c/asap-aes/overview).
 
 To download the dataset, make a new folder called `data` and run
 this command in the folder:
@@ -80,6 +80,8 @@ python train_cbow.py --load_model test --outputdir=test_model --temp_path test_t
 
 ### Results
 
+#### SentEval
+
 Run this command to get a tabulated version of SentEval results: 
 ```
 python data.py -om
@@ -120,4 +122,13 @@ Compare nonlinear_full to cmow_full (percentage difference)
 |  cmp |   -0.91 |          0.86 |        -0.23 |   -0.71 |                   -1.14 |    -1.19 |       -1.39 |                -1 |        1.08 |         -1.58 |   -0.2 |  -0.72 | -0.74 | -0.83 |  -0.89 |    1.2 |            -0.82 |   2.05 |  -8.52 |  -1.35 |           -4.7 |               1.7 |    0.95 |    3.43 |    0.71 |   -2.73 |   -4.67 |
 
 Average percent difference over all tasks: -0.83
+
+#### ASAP-AES
+
+Loss is Cross Entropy Loss.
+
+|          |validation loss   |validation accuracy|
+|----------|------------------|-------------------|
+|nonlinear |4.329262733459473 | 30.55818673883626 |
+|cmow      |4.326107501983643 | 30.92016238159675 |
 
